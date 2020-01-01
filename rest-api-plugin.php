@@ -105,6 +105,15 @@ function post_menus() {
         $sql = "insert into wp_term_relationships (object_id, term_taxonomy_id, term_order) values (".$idItem.",";
         $sql = $sql." ".$idMenu.", 0);";
         $connection->query( $sql );
+        $sql = "select count from wp_term_taxonomy where term_id=".$idMenu.";";
+        $result = $connection->query( $sql );
+        $raw = $result->fetch_assoc();
+        $count = $raw['count'];
+        $result->free();
+        $count = intval( $count );
+        $count += 1;
+        $sql = "update wp_term_taxonomy set count=".$count." where term_id=".$idMenu.";";
+        $connection->query( $sql );
     } else {
         $response = array(
             'code' => 'no_server_response',
