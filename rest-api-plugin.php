@@ -312,6 +312,9 @@ function post_pagess() {
 // Aktualizacja strony
 function put_pagess( $data ) {
     if( $data['id'] ) {
+        $request = file_get_contents( 'php://input' );
+        $content = json_decode( $request );
+        return $content;
         $connection = @new mysqli( DB_HOST, DB_USER, DB_PASSWORD );
         if( $connection->connect_errno ) {
             $response = array(
@@ -324,17 +327,17 @@ function put_pagess( $data ) {
         $date_time = new DateTime( 'now', new DateTimeZone( 'Europe/Warsaw' ) );
         $date_time_gmt = new DateTime( 'now', new DateTimeZone( 'GMT' ) );
         $connection->set_charset( 'utf8' );
-        $sql = "update wp_posts set post_author='".$data->post_author."', post_content='".$data->post_content."',";
-        $sql = $sql." post_title='".$data->post_title."', post_excerpt='".$data->post_excerpt."',";
-        $sql = $sql." post_status='".$data->post_status."', comment_status='".$data->comment_status."',";
-        $sql = $sql." ping_status='".$data->ping_status."', post_password='".$data->post_password."',";
-        $sql = $sql." post_name='".$data->post_name."', to_ping='".$data->to_ping."',";
-        $sql = $sql." pinged='".$data->pinged."', post_modified='".$date_time->format( 'Y-m-d H:i:s' )."',";
+        $sql = "update wp_posts set post_author='".$content->post_author."', post_content='".$content->post_content."',";
+        $sql = $sql." post_title='".$content->post_title."', post_excerpt='".$content->post_excerpt."',";
+        $sql = $sql." post_status='".$content->post_status."', comment_status='".$content->comment_status."',";
+        $sql = $sql." ping_status='".$content->ping_status."', post_password='".$content->post_password."',";
+        $sql = $sql." post_name='".$content->post_name."', to_ping='".$content->to_ping."',";
+        $sql = $sql." pinged='".$content->pinged."', post_modified='".$date_time->format( 'Y-m-d H:i:s' )."',";
         $sql = $sql." post_modified_gmt='".$date_time_gmt->format( 'Y-m-d H:i:s' )."',";
-        $sql = $sql." post_content_filtered='".$data->post_content_filtered."', post_parent='".$data->post_parent."',";
-        $sql = $sql." guid='".$data->guid."', menu_order='".$data->menu_order."',";
-        $sql = $sql." post_mime_type='".$data->post_mime_type."', comment_count='".$data->comment_count."',";
-        $sql = $sql." post_type='".$data->post_type."' where ID=".$data['id'].";";
+        $sql = $sql." post_content_filtered='".$content->post_content_filtered."', post_parent='".$content->post_parent."',";
+        $sql = $sql." guid='".$content->guid."', menu_order='".$content->menu_order."',";
+        $sql = $sql." post_mime_type='".$content->post_mime_type."', comment_count='".$content->comment_count."',";
+        $sql = $sql." post_type='".$content->post_type."' where ID=".$data['id'].";";
         if( !$connection->query( $sql )) {
             $response = array(
                 'code' => 'no_server_response',
