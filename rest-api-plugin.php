@@ -314,7 +314,6 @@ function put_pagess( $data ) {
     if( $data['id'] ) {
         $request = file_get_contents( 'php://input' );
         $content = json_decode( $request );
-        return $content;
         $connection = @new mysqli( DB_HOST, DB_USER, DB_PASSWORD );
         if( $connection->connect_errno ) {
             $response = array(
@@ -328,15 +327,13 @@ function put_pagess( $data ) {
         $date_time_gmt = new DateTime( 'now', new DateTimeZone( 'GMT' ) );
         $connection->set_charset( 'utf8' );
         $sql = "update wp_posts set post_author='".$content->post_author."', post_content='".$content->post_content."',";
-        $sql = $sql." post_title='".$content->post_title."', post_excerpt='".$content->post_excerpt."',";
+        $sql = $sql." post_title='".$content->post_title."', ";
         $sql = $sql." post_status='".$content->post_status."', comment_status='".$content->comment_status."',";
-        $sql = $sql." ping_status='".$content->ping_status."', post_password='".$content->post_password."',";
-        $sql = $sql." post_name='".$content->post_name."', to_ping='".$content->to_ping."',";
-        $sql = $sql." pinged='".$content->pinged."', post_modified='".$date_time->format( 'Y-m-d H:i:s' )."',";
+        $sql = $sql." ping_status='".$content->ping_status."',";
+        $sql = $sql." post_name='".$content->post_name."',";
+        $sql = $sql." post_modified='".$date_time->format( 'Y-m-d H:i:s' )."',";
         $sql = $sql." post_modified_gmt='".$date_time_gmt->format( 'Y-m-d H:i:s' )."',";
-        $sql = $sql." post_content_filtered='".$content->post_content_filtered."', post_parent='".$content->post_parent."',";
-        $sql = $sql." guid='".$content->guid."', menu_order='".$content->menu_order."',";
-        $sql = $sql." post_mime_type='".$content->post_mime_type."', comment_count='".$content->comment_count."',";
+        $sql = $sql." guid='".$content->guid."',";
         $sql = $sql." post_type='".$content->post_type."' where ID=".$data['id'].";";
         if( !$connection->query( $sql )) {
             $response = array(
@@ -373,10 +370,27 @@ function post_media() {
     }
 }
 
+function get_slider() {
+    $source = str_replace('plugins/rest-api-plugin', 'media', __DIR__);
+    $content = file_get_contents( $source.'/sliderData.txt' );
+    return array( 'code' => 200, 'data' => $content, 'message' => 'Znaleziono plik' );
+}
+
+function put_slider() {
+    $request = file_get_contents( 'php://input' );
+    $data = json_decode( $request );
+    $source = str_replace('plugins/rest-api-plugin', 'media', __DIR__);
+    $file = fopen( $source.'/sliderData.txt', 'w+' );
+    fwrite( $file, $data->data );
+    fclose( $file );
+    return array( 'code' => 200, 'data' => '', 'message' => 'Zapisano zawartość' );
+}
+
 function test() {
-    $widget = new WP_Widget();
+    // $widget = new WP_Widget();
     //echo print_r( $widget->id );
-    return array( 'name' => $widget );
+    $source = str_replace('plugins/rest-api-plugin', 'media', __DIR__);
+    return array( 'name' => $source );
 }
 
 add_action('rest_api_init', function () {
@@ -458,6 +472,16 @@ add_action('rest_api_init', function () {
     register_rest_route( 'api/v1', '/media', array(
         'methods' => 'POST',
         'callback' => 'post_media'
+    ) );
+
+    register_rest_route( 'api/v1', '/slider', array(
+        'methods' => 'GET',
+        'callback' => 'get_slider'
+    ) );
+
+    register_rest_route( 'api/v1', '/slider', array(
+        'methods' => 'PUT',
+        'callback' => 'put_slider'
     ) );
 
     register_rest_route( 'api/v1', '/test', array(
